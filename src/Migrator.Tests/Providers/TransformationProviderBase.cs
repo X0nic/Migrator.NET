@@ -8,7 +8,7 @@ namespace Migrator.Tests.Providers
   /// <summary>
   /// Base class for Provider tests for all non-constraint oriented tests.
   /// </summary>
-  public class TransformationProviderBase
+  public abstract class TransformationProviderBase
   {
     protected ITransformationProvider _provider;
 
