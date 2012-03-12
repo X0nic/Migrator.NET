@@ -129,7 +129,7 @@ namespace Migrator.MigratorConsole
 			int tab = 17;
 			Version ver = Assembly.GetExecutingAssembly().GetName().Version;
 			
-			Console.WriteLine("Database migrator - v{0}.{1}.{2}", ver.Major, ver.Minor, ver.Revision);
+			Console.WriteLine("Database migrator - v{0}", ver);
 			Console.WriteLine();
 			Console.WriteLine("usage:\nMigrator.Console.exe provider connectionString migrationsAssembly [options]");
 			Console.WriteLine();
