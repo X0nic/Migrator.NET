@@ -299,6 +299,8 @@ namespace Migrator.Tests.Providers
     [Test]
     public void AppliedMigrations()
     {
+        var mockMigration = new MigrationAttribute(1);
+
       Assert.IsFalse(_provider.TableExists("SchemaInfo"));
 
       // Check that a "get" call works on the first run.
@@ -306,12 +308,12 @@ namespace Migrator.Tests.Providers
       Assert.IsTrue(_provider.TableExists("SchemaInfo"), "No SchemaInfo table created");
 
       // Check that a "set" called after the first run works.
-      _provider.MigrationApplied(1);
+      _provider.MigrationApplied(mockMigration);
       Assert.AreEqual(1, _provider.AppliedMigrations[0]);
 
       _provider.RemoveTable("SchemaInfo");
       // Check that a "set" call works on the first run.
-      _provider.MigrationApplied(1);
+      _provider.MigrationApplied(mockMigration);
       Assert.AreEqual(1, _provider.AppliedMigrations[0]);
       Assert.IsTrue(_provider.TableExists("SchemaInfo"), "No SchemaInfo table created");
     }

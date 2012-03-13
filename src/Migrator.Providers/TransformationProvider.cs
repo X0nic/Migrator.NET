@@ -756,27 +756,27 @@ namespace Migrator.Providers
 				return _appliedMigrations;
 			}
 		}
-		
-		/// <summary>
-        /// Marks a Migration version number as having been applied
-        /// </summary>
-        /// <param name="version">The version number of the migration that was applied</param>
-		public void MigrationApplied(long version)
+
+	    /// <summary>
+	    /// Marks a Migration attribute as having been applied
+	    /// </summary>
+	    /// <param name="attribute">The migration attribute that was applied</param>
+	    public void MigrationApplied(MigrationAttribute attribute)
 		{
 			CreateSchemaInfoTable();
-			Insert("SchemaInfo",new string[]{"version"},new string[]{version.ToString()});
-			_appliedMigrations.Add(version);
+            Insert("SchemaInfo", new [] { "version" }, new string[] { attribute.Version.ToString() });
+			_appliedMigrations.Add(attribute.Version);
 		}
-		
-        /// <summary>
-        /// Marks a Migration version number as having been rolled back from the database
-        /// </summary>
-        /// <param name="version">The version number of the migration that was removed</param>
-		public void MigrationUnApplied(long version)
+
+	    /// <summary>
+	    /// Marks a Migration attribute as having been rolled back from the database
+	    /// </summary>
+	    /// <param name="attribute">The migration attribute that was removed</param>
+	    public void MigrationUnApplied(MigrationAttribute attribute)
 		{
 			CreateSchemaInfoTable();
-			Delete("SchemaInfo", "version", version.ToString());
-			_appliedMigrations.Remove(version);
+            Delete("SchemaInfo", "version", attribute.Version.ToString());
+			_appliedMigrations.Remove(attribute.Version);
 		}
 
 		protected void CreateSchemaInfoTable()

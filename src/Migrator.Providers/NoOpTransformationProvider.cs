@@ -283,12 +283,12 @@ namespace Migrator.Providers
             get { return this; }
         }
 
-        public void MigrationApplied(long version)
+        public void MigrationApplied(MigrationAttribute attribute)
         {
         	//no op
         }
 
-        public void MigrationUnApplied(long version)
+        public void MigrationUnApplied(MigrationAttribute attribute)
         {
         	//no op
         }

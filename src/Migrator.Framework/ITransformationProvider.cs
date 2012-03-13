@@ -344,16 +344,16 @@ namespace Migrator.Framework
         int Delete(string table, string whereColumn, string whereValue);
 
         /// <summary>
-        /// Marks a Migration version number as having been applied
+        /// Marks a Migration as having been applied
         /// </summary>
-        /// <param name="version">The version number of the migration that was applied</param>
-        void MigrationApplied(long version);
-        
+        /// <param name="attribute"> </param>
+        void MigrationApplied(MigrationAttribute attribute);
+
         /// <summary>
-        /// Marks a Migration version number as having been rolled back from the database
+        /// Marks a Migration as having been rolled back from the database
         /// </summary>
-        /// <param name="version">The version number of the migration that was removed</param>
-        void MigrationUnApplied(long version);
+        /// <param name="attribute">The attribute of the migration that was removed</param>
+        void MigrationUnApplied(MigrationAttribute attribute);
         
         /// <summary>
         /// Remove an existing column from a table
