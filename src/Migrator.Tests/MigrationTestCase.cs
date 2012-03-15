@@ -28,7 +28,7 @@ namespace Migrator.Tests
 		[SetUp]
 		public void SetUp()
 		{			
-            _migrator = new Migrator(TransformationProvider, MigrationAssembly, true);
+            _migrator = new Migrator(TransformationProvider, MigrationAssembly, true, null);
 			
 			Assert.IsTrue(_migrator.MigrationsTypes.Count > 0, "No migrations in assembly " + MigrationAssembly.Location);
 			

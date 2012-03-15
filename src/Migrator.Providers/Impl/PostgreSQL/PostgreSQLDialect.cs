@@ -38,7 +38,7 @@ namespace Migrator.Providers.PostgreSQL
             RegisterProperty(ColumnProperty.Identity, "serial");
         }
 
-		public override ITransformationProvider GetTransformationProvider(Dialect dialect, string connectionString)
+        public override ITransformationProvider GetTransformationProvider(Dialect dialect, string connectionString, string schemaName)
 		{
 			return new PostgreSQLTransformationProvider(dialect, connectionString);
 		}

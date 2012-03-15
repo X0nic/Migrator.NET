@@ -40,7 +40,7 @@ namespace Migrator.Providers.SqlServer
 	        RegisterProperty(ColumnProperty.Identity, "IDENTITY");
         }
 
-		public override ITransformationProvider GetTransformationProvider(Dialect dialect, string connectionString)
+        public override ITransformationProvider GetTransformationProvider(Dialect dialect, string connectionString, string schemaName)
 		{
 			return new SqlServerTransformationProvider(dialect, connectionString);
 		}

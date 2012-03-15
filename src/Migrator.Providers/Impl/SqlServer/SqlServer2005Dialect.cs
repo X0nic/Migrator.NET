@@ -13,7 +13,7 @@ namespace Migrator.Providers.SqlServer
             RegisterColumnType(DbType.Xml, "XML");
         }
 
-		public override ITransformationProvider GetTransformationProvider(Dialect dialect, string connectionString)
+        public override ITransformationProvider GetTransformationProvider(Dialect dialect, string connectionString, string schemaName)
 		{
 			return new SqlServerTransformationProvider(dialect, connectionString);
 		}

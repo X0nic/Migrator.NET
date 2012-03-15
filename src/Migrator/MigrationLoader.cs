@@ -14,10 +14,10 @@ namespace Migrator
         private readonly ITransformationProvider _provider;
         private readonly List<Type> _migrationsTypes = new List<Type>();
 
-        public MigrationLoader(ITransformationProvider provider, Assembly migrationAssembly, bool trace)
+        public MigrationLoader(ITransformationProvider provider, Assembly migrationAssembly, bool trace, string schemaName)
         {
             _provider = provider;
-            AddMigrations(migrationAssembly);
+            AddMigrations(migrationAssembly, schemaName);
 
             if (trace)
             {
@@ -29,10 +29,10 @@ namespace Migrator
             }
         }
 
-        public void AddMigrations(Assembly migrationAssembly)
+        public void AddMigrations(Assembly migrationAssembly, string schemaName)
         {
             if (migrationAssembly != null)
-                _migrationsTypes.AddRange(GetMigrationTypes(migrationAssembly));
+                _migrationsTypes.AddRange(GetMigrationTypes(migrationAssembly, schemaName));
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Migrator
         /// <exception cref="CheckForDuplicatedVersion">CheckForDuplicatedVersion</exception>
         public void CheckForDuplicatedVersion()
         {
-            List<long> versions = new List<long>();
+            var versions = new List<long>();
             foreach (Type t in _migrationsTypes)
             {
                 long version = GetMigrationVersion(t);
@@ -78,23 +78,44 @@ namespace Migrator
         /// Collect migrations in one <c>Assembly</c>.
         /// </summary>
         /// <param name="asm">The <c>Assembly</c> to browse.</param>
+        /// <param name="schemaName"> </param>
         /// <returns>The migrations collection</returns>
-        public static List<Type> GetMigrationTypes(Assembly asm)
+        public List<Type> GetMigrationTypes(Assembly asm, string schemaName)
         {
-            List<Type> migrations = new List<Type>();
+            var migrations = new List<Type>();
             foreach (Type t in asm.GetExportedTypes())
             {
-                MigrationAttribute attrib = 
-                    (MigrationAttribute)  Attribute.GetCustomAttribute(t, typeof (MigrationAttribute));
+                var attrib = (MigrationAttribute)  Attribute.GetCustomAttribute(t, typeof (MigrationAttribute));
 
-                if (attrib != null && typeof(IMigration).IsAssignableFrom(t) && !attrib.Ignore)
+                if (attrib != null && typeof(IMigration).IsAssignableFrom(t))
                 {
-                    migrations.Add(t);
+                    if (!attrib.Ignore && Lower(attrib.Schema) == Lower(schemaName))
+                        migrations.Add(t);
+                    else
+                    {
+                        if (attrib.Ignore)
+                            _provider.Logger.Trace("Ignoring migration: {0} {1}", GetMigrationVersion(t).ToString().PadLeft(5), StringUtils.ToHumanName(t.Name));
+                        else if (Lower(attrib.Schema) != Lower(schemaName))
+                            _provider.Logger.Trace("Migration schema not {0}: ({1}){2} {3}", GetSchemaName(schemaName), GetSchemaName(attrib.Schema), GetMigrationVersion(t).ToString().PadLeft(5), StringUtils.ToHumanName(t.Name));
+                    }
                 }
             }
 
             migrations.Sort(new MigrationTypeComparer(true));
             return migrations;
+        }
+
+        private string Lower(string stringToLower)
+        {
+            if (stringToLower == null) return null;
+            return stringToLower.ToLower();
+        }
+
+        private static string GetSchemaName(string schemaName)
+        {
+            if (schemaName != null)
+                return schemaName;
+            return "-Blank-";
         }
 
         /// <summary>
@@ -105,8 +126,7 @@ namespace Migrator
         /// <returns>Version number sepcified in the attribute</returns>
         public static long GetMigrationVersion(Type t)
         {
-            MigrationAttribute attrib = (MigrationAttribute)
-                                        Attribute.GetCustomAttribute(t, typeof(MigrationAttribute));
+            var attrib = (MigrationAttribute) Attribute.GetCustomAttribute(t, typeof(MigrationAttribute));
 
             return attrib.Version;
         }
@@ -124,7 +144,7 @@ namespace Migrator
             {
                 if (GetMigrationVersion(t) == version)
                 {
-                    IMigration migration = (IMigration)Activator.CreateInstance(t);
+                    var migration = (IMigration)Activator.CreateInstance(t);
                     migration.Database = _provider;
                     return migration;
                 }

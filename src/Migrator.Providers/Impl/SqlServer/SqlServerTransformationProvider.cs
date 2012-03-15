@@ -25,7 +25,7 @@ namespace Migrator.Providers.SqlServer
     public class SqlServerTransformationProvider : TransformationProvider
     {
         public SqlServerTransformationProvider(Dialect dialect, string connectionString)
-            : base(dialect, connectionString)
+            : base(dialect, connectionString, null)
         {
             CreateConnection();
         }

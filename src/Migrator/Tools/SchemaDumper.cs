@@ -18,9 +18,9 @@ namespace Migrator.Tools
 	{
 	    private readonly ITransformationProvider _provider;
 		
-		public SchemaDumper(string provider, string connectionString)
+		public SchemaDumper(string provider, string connectionString, string schemaName)
 		{
-			_provider = ProviderFactory.Create(provider, connectionString);
+			_provider = ProviderFactory.Create(provider, connectionString, schemaName);
 		}
 		
 		public string Dump()

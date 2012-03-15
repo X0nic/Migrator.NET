@@ -147,7 +147,7 @@ namespace Migrator.NAnt
 
         private void Execute(Assembly asm)
         {
-            Migrator mig = new Migrator(Provider, ConnectionString, asm, Trace, new TaskLogger(this));
+            Migrator mig = new Migrator(Provider, ConnectionString, asm, Trace, new TaskLogger(this), null);
             mig.DryRun = DryRun;
             if (ScriptChanges)
             {

@@ -48,7 +48,7 @@ namespace Migrator.Providers.Mysql
             RegisterProperty(ColumnProperty.Identity, "AUTO_INCREMENT");
         }
 
-		public override ITransformationProvider GetTransformationProvider(Dialect dialect, string connectionString)
+		public override ITransformationProvider GetTransformationProvider(Dialect dialect, string connectionString, string schemaName)
 		{
 			return new MySqlTransformationProvider(dialect, connectionString);
 		}

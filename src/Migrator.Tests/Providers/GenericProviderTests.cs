@@ -21,7 +21,7 @@ namespace Migrator.Tests.Providers
 
     class GenericTransformationProvider : TransformationProvider
     {
-		public GenericTransformationProvider() : base(null, null)
+		public GenericTransformationProvider() : base(null, null, null)
 		{
 		}
 

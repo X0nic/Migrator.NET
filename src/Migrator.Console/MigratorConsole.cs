@@ -26,6 +26,7 @@ namespace Migrator.MigratorConsole
 		private string _provider;
 		private string _connectionString;
 		private string _migrationsAssembly;
+		private string _schemaName;
 		private bool _list = false;
 		private bool _trace = false;
 		private bool _dryrun = false;
@@ -116,7 +117,7 @@ namespace Migrator.MigratorConsole
 		{
 			CheckArguments();
 			
-			SchemaDumper dumper = new SchemaDumper(_provider, _connectionString);
+			SchemaDumper dumper = new SchemaDumper(_provider, _connectionString, _schemaName);
 			
 			dumper.DumpTo(_dumpTo);
 		}
@@ -142,6 +143,7 @@ namespace Migrator.MigratorConsole
 			Console.WriteLine("\t-{0}{1}", "trace".PadRight(tab), "Show debug informations");
 			Console.WriteLine("\t-{0}{1}", "dump FILE".PadRight(tab), "Dump the database schema as migration code");
 			Console.WriteLine("\t-{0}{1}", "dryrun".PadRight(tab), "Simulation mode (don't actually apply/remove any migrations)");
+			Console.WriteLine("\t-{0}{1}", "schema NAME".PadRight(tab), "The schema name to apply migration to. This just controls the migration tracking, your migrations need to ensure they are going to the correct schema.");
 			Console.WriteLine();
 		}
 		
@@ -158,7 +160,7 @@ namespace Migrator.MigratorConsole
 		{
 			Assembly asm = Assembly.LoadFrom(_migrationsAssembly);
 			
-			Migrator migrator = new Migrator(_provider, _connectionString, asm, _trace);
+			Migrator migrator = new Migrator(_provider, _connectionString, asm, _trace, _schemaName);
 			migrator.args = args;
 		    migrator.DryRun = _dryrun;
 			return migrator;
@@ -189,7 +191,12 @@ namespace Migrator.MigratorConsole
 				{
 					_dumpTo = argv[i+1];
 					i++;
-				}
+                }
+                else if (argv[i].Equals("-schema"))
+                {
+                    _schemaName = argv[i + 1];
+                    i++;
+                }
 				else
 				{
 					if (i == 0) _provider = argv[i];

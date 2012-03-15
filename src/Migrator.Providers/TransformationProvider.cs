@@ -30,18 +30,20 @@ namespace Migrator.Providers
 		private ILogger _logger;
 		protected IDbConnection _connection;
 		private IDbTransaction _transaction;
-		private List<long> _appliedMigrations;
+	    protected List<long> _appliedMigrations;
 
 		protected readonly string _connectionString;
-		protected Dialect _dialect;
+	    protected readonly string _schemaName;
+	    protected Dialect _dialect;
 
-		private readonly ForeignKeyConstraintMapper constraintMapper = new ForeignKeyConstraintMapper();
+		private readonly ForeignKeyConstraintMapper _constraintMapper = new ForeignKeyConstraintMapper();
 
-		protected TransformationProvider(Dialect dialect, string connectionString)
+		protected TransformationProvider(Dialect dialect, string connectionString, string schemaName)
 		{
 			_dialect = dialect;
 			_connectionString = connectionString;
-			_logger = new Logger(false);
+		    _schemaName = schemaName;
+		    _logger = new Logger(false);
 		}
 
 		/// <summary>
@@ -188,7 +190,7 @@ namespace Migrator.Providers
             List<string> pks = GetPrimaryKeys(columns);
             bool compoundPrimaryKey = pks.Count > 1;
 
-            List<ColumnPropertiesMapper> columnProviders = new List<ColumnPropertiesMapper>(columns.Length);
+            var columnProviders = new List<ColumnPropertiesMapper>(columns.Length);
             foreach (Column column in columns)
             {
                 // Remove the primary key notation if compound primary key because we'll add it back later
@@ -210,7 +212,7 @@ namespace Migrator.Providers
 
 		public List<string> GetPrimaryKeys(IEnumerable<Column> columns)
 		{
-			List<string> pks = new List<string>();
+			var pks = new List<string>();
 			foreach (Column col in columns)
 			{
 				if (col.IsPrimaryKey)
@@ -526,7 +528,7 @@ namespace Migrator.Providers
 				return;
 			}
 
-			string constraintResolved = constraintMapper.SqlForConstraint(constraint);
+			string constraintResolved = _constraintMapper.SqlForConstraint(constraint);
 			ExecuteNonQuery(
 				String.Format(
 					"ALTER TABLE {0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3} ({4}) ON UPDATE {5} ON DELETE {6}",
@@ -739,7 +741,7 @@ namespace Migrator.Providers
         /// <summary>
         /// The list of Migrations currently applied to the database.
         /// </summary>
-		public List<long> AppliedMigrations
+		public virtual List<long> AppliedMigrations
 		{
 			get
 			{
@@ -747,7 +749,8 @@ namespace Migrator.Providers
 				{
 					_appliedMigrations = new List<long>();
 					CreateSchemaInfoTable();
-					using(IDataReader reader = Select("version","SchemaInfo")){
+                    using (IDataReader reader = Select("version", "SchemaInfo"))
+                    {
 						while(reader.Read()){
                             _appliedMigrations.Add(Convert.ToInt64(reader.GetValue(0)));
 						}
@@ -761,10 +764,10 @@ namespace Migrator.Providers
 	    /// Marks a Migration attribute as having been applied
 	    /// </summary>
 	    /// <param name="attribute">The migration attribute that was applied</param>
-	    public void MigrationApplied(MigrationAttribute attribute)
+	    public virtual void MigrationApplied(MigrationAttribute attribute)
 		{
 			CreateSchemaInfoTable();
-            Insert("SchemaInfo", new [] { "version" }, new string[] { attribute.Version.ToString() });
+            Insert("SchemaInfo", new[] { "version" }, new[] { attribute.Version.ToString() });
 			_appliedMigrations.Add(attribute.Version);
 		}
 
@@ -772,23 +775,23 @@ namespace Migrator.Providers
 	    /// Marks a Migration attribute as having been rolled back from the database
 	    /// </summary>
 	    /// <param name="attribute">The migration attribute that was removed</param>
-	    public void MigrationUnApplied(MigrationAttribute attribute)
+	    public virtual void MigrationUnApplied(MigrationAttribute attribute)
 		{
-			CreateSchemaInfoTable();
+            CreateSchemaInfoTable();
             Delete("SchemaInfo", "version", attribute.Version.ToString());
 			_appliedMigrations.Remove(attribute.Version);
 		}
 
-		protected void CreateSchemaInfoTable()
+        protected virtual void CreateSchemaInfoTable()
 		{
 			EnsureHasConnection();
-			if (!TableExists("SchemaInfo"))
+            if (!TableExists("SchemaInfo"))
 			{
-				AddTable("SchemaInfo", new Column("Version", DbType.Int64, ColumnProperty.PrimaryKey));
+                AddTable("SchemaInfo", new Column("Version", DbType.Int64, ColumnProperty.PrimaryKey));
 			}
 		}
 
-		public void AddColumn(string table, Column column)
+	    public void AddColumn(string table, Column column)
 		{
 			AddColumn(table, column.Name, column.Type, column.Size, column.ColumnProperty, column.DefaultValue);
 		}

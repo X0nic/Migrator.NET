@@ -29,7 +29,6 @@ namespace Migrator
         private readonly MigrationLoader _migrationLoader;
 
         private ILogger _logger = new Logger(false);
-        protected bool _dryrun;
         private string[] _args;
 
         public string[] args
@@ -38,32 +37,32 @@ namespace Migrator
             set { _args = value; }
         }
 
-        public Migrator(string provider, string connectionString, Assembly migrationAssembly)
-            : this(provider, connectionString, migrationAssembly, false)
+        public Migrator(string provider, string connectionString, Assembly migrationAssembly, string schemaName)
+            : this(provider, connectionString, migrationAssembly, false, schemaName)
         {
         }
 
-        public Migrator(string provider, string connectionString, Assembly migrationAssembly, bool trace)
-            : this(ProviderFactory.Create(provider, connectionString), migrationAssembly, trace)
+        public Migrator(string provider, string connectionString, Assembly migrationAssembly, bool trace, string schemaName)
+            : this(ProviderFactory.Create(provider, connectionString, schemaName), migrationAssembly, trace,schemaName)
         {
         }
 
-        public Migrator(string provider, string connectionString, Assembly migrationAssembly, bool trace, ILogger logger)
-            : this(ProviderFactory.Create(provider, connectionString), migrationAssembly, trace, logger)
+        public Migrator(string provider, string connectionString, Assembly migrationAssembly, bool trace, ILogger logger, string schemaName)
+            : this(ProviderFactory.Create(provider, connectionString, schemaName), migrationAssembly, trace, logger,schemaName)
         {
         }
 
-        public Migrator(ITransformationProvider provider, Assembly migrationAssembly, bool trace)
-            : this(provider, migrationAssembly, trace, new Logger(trace, new ConsoleWriter()))
+        public Migrator(ITransformationProvider provider, Assembly migrationAssembly, bool trace, string schemaName)
+            : this(provider, migrationAssembly, trace, new Logger(trace, new ConsoleWriter()), schemaName)
         {
         }
 
-        public Migrator(ITransformationProvider provider, Assembly migrationAssembly, bool trace, ILogger logger)
+        public Migrator(ITransformationProvider provider, Assembly migrationAssembly, bool trace, ILogger logger, string schemaName)
         {
             _provider = provider;
             Logger = logger;
 
-            _migrationLoader = new MigrationLoader(provider, migrationAssembly, trace);
+            _migrationLoader = new MigrationLoader(provider, migrationAssembly, trace, schemaName);
             _migrationLoader.CheckForDuplicatedVersion();
         }
 
@@ -106,11 +105,9 @@ namespace Migrator
             }
         }
 
-        public virtual bool DryRun
-        {
-            get { return _dryrun; }
-            set { _dryrun = value; }
-        }
+        public virtual bool DryRun { get; set; }
+        
+        public virtual string SchemaName { get; private set; }
 
         /// <summary>
         /// Migrate the database to a specific version.

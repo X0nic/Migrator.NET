@@ -33,11 +33,11 @@ namespace Migrator
             LoadDialects();
         }
 
-        public static ITransformationProvider Create(string providerName, string connectionString)
+        public static ITransformationProvider Create(string providerName, string connectionString, string schemaName)
         {
             var dialectInstance = DialectForProvider(providerName);
 
-            return dialectInstance.NewProviderForDialect( connectionString );
+            return dialectInstance.NewProviderForDialect(connectionString, schemaName);
         }
 
         public static Dialect DialectForProvider(string providerName)
@@ -53,7 +53,7 @@ namespace Migrator
             return null;
         }
 
-        public static void LoadDialects()
+        private static void LoadDialects()
         {
             Type dialectType = typeof (Dialect);
             foreach (Type t in providerAssembly.GetTypes())
