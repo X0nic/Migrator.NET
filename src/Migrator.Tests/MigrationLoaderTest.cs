@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Reflection;
 using Migrator.Framework;
 using Migrator.Framework.Loggers;
 using NUnit.Framework;
+using NUnit.Framework.SyntaxHelpers;
 using NUnit.Mocks;
 
 namespace Migrator.Tests
@@ -38,6 +40,18 @@ namespace Migrator.Tests
         }
 
         [Test]
+        public void ShouldReturnProperMigrationCount()
+        {
+            Assert.That(_migrationLoader.GetAvailableMigrations().Count, Is.EqualTo(11));
+        }
+
+        [Test]
+        public void ShouldReturnMigrationList()
+        {
+            Assert.That(_migrationLoader.GetAvailableMigrations(), Is.EqualTo(new List<long> { 1, 1, 2, 2, 3, 4, 5, 6, 7, 7, 2008070195 }));
+        }
+
+        [Test]
         [ExpectedException(typeof(DuplicatedVersionException))]
         public void CheckForDuplicatedVersion()
         {
@@ -64,6 +78,7 @@ namespace Migrator.Tests
             _migrationLoader.MigrationsTypes.Add(typeof(MigratorTest.BadMigration));
             _migrationLoader.MigrationsTypes.Add(typeof(MigratorTest.SixthMigration));
             _migrationLoader.MigrationsTypes.Add(typeof(MigratorTest.NonIgnoredMigration));
+
         }
     }
 }

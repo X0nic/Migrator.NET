@@ -7,12 +7,12 @@ namespace Migrator
     {
         protected readonly ITransformationProvider _provider;
         protected ILogger _logger;
-        protected List<long> _availableMigrations;
+        protected IList<long> _availableMigrations;
         protected List<long> _original;
         protected long _current;
         protected bool _dryrun;
 
-        protected BaseMigrate(List<long> availableMigrations, ITransformationProvider provider, ILogger logger)
+        protected BaseMigrate(IList<long> availableMigrations, ITransformationProvider provider, ILogger logger)
         {
             _provider = provider;
             _availableMigrations = availableMigrations;
@@ -20,7 +20,7 @@ namespace Migrator
             _logger = logger;
         }
 
-        public static BaseMigrate GetInstance(List<long> availableMigrations, ITransformationProvider provider, ILogger logger)
+        public static BaseMigrate GetInstance(IList<long> availableMigrations, ITransformationProvider provider, ILogger logger)
         {
         	return new MigrateAnywhere(availableMigrations, provider, logger);
         }

@@ -46,5 +46,11 @@ namespace Migrator.Framework
         /// The schema that this migration belongs to.
         /// </summary>
         public string Schema { get; set; }
+
+        /// <summary>
+        /// Set to <c>true</c> to hide this migration, if it is already applied.
+        /// This migration will still be applied, if it is needed.
+        /// </summary>
+        public bool Obsolete { get; set; }
     }
 }

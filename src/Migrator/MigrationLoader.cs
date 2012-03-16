@@ -126,16 +126,21 @@ namespace Migrator
         /// <returns>Version number sepcified in the attribute</returns>
         public static long GetMigrationVersion(Type t)
         {
-            var attrib = (MigrationAttribute) Attribute.GetCustomAttribute(t, typeof(MigrationAttribute));
+            var attrib = GetMigrationAttribute(t);
 
             return attrib.Version;
         }
 
-        public List<long> GetAvailableMigrations()
+        public static MigrationAttribute GetMigrationAttribute(Type t)
+        {
+            return (MigrationAttribute) Attribute.GetCustomAttribute(t, typeof(MigrationAttribute));
+        }
+
+        public IList<long> GetAvailableMigrations()
         {
         	//List<int> availableMigrations = new List<int>();
             _migrationsTypes.Sort(new MigrationTypeComparer(true));
-            return _migrationsTypes.ConvertAll(new Converter<Type, long>(GetMigrationVersion));
+            return _migrationsTypes.ConvertAll(GetMigrationVersion);
         }
         
         public IMigration GetMigration(long version)

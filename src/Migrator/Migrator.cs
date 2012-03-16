@@ -106,6 +106,8 @@ namespace Migrator
         }
 
         public virtual bool DryRun { get; set; }
+
+        public virtual bool Obsolete { get; set; }
         
         public virtual string SchemaName { get; private set; }
 

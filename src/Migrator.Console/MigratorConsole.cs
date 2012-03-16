@@ -30,6 +30,7 @@ namespace Migrator.MigratorConsole
 		private bool _list = false;
 		private bool _trace = false;
 		private bool _dryrun = false;
+        private bool _obsolete = false;
 		private string _dumpTo;
 		private long _migrateTo = -1;
 		private string[] args;
@@ -104,12 +105,34 @@ namespace Migrator.MigratorConsole
 			Console.WriteLine("Available migrations:");
 			foreach (Type t in mig.MigrationsTypes)
 			{
-                long v = MigrationLoader.GetMigrationVersion(t);
-				Console.WriteLine("{0} {1} {2}",
-                                  appliedMigrations.Contains(v) ? "=>" : "  ",
-				                  v.ToString().PadLeft(3),
-				                  StringUtils.ToHumanName(t.Name)
-				                 );
+                var attr = MigrationLoader.GetMigrationAttribute(t);
+                if (appliedMigrations.Contains(attr.Version))
+                {
+                    if (attr.Obsolete && _obsolete)
+                    {
+                        Console.WriteLine("{0} {1} {2}",
+                                          attr.Obsolete && _obsolete ? "=> (Obsolete)" : "=>",
+                                          attr.Version.ToString().PadLeft(3),
+                                          StringUtils.ToHumanName(t.Name)
+                            );
+                    }
+                    else if (!attr.Obsolete)
+                    {
+                        Console.WriteLine("{0} {1} {2}",
+                                          "=>",
+                                          attr.Version.ToString().PadLeft(3),
+                                          StringUtils.ToHumanName(t.Name)
+                            );
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("{0} {1} {2}",
+                                      attr.Obsolete ? "(Obsolete)" : "  ",
+                                      attr.Version.ToString().PadLeft(3),
+                                      StringUtils.ToHumanName(t.Name)
+                        );
+                }
 			}
 		}
 		
@@ -142,8 +165,12 @@ namespace Migrator.MigratorConsole
 			Console.WriteLine("\t-{0}{1}", "list".PadRight(tab), "List migrations");
 			Console.WriteLine("\t-{0}{1}", "trace".PadRight(tab), "Show debug informations");
 			Console.WriteLine("\t-{0}{1}", "dump FILE".PadRight(tab), "Dump the database schema as migration code");
-			Console.WriteLine("\t-{0}{1}", "dryrun".PadRight(tab), "Simulation mode (don't actually apply/remove any migrations)");
-			Console.WriteLine("\t-{0}{1}", "schema NAME".PadRight(tab), "The schema name to apply migration to. This just controls the migration tracking, your migrations need to ensure they are going to the correct schema.");
+			Console.WriteLine("\t-{0}{1}", "dryrun".PadRight(tab), "Simulation mode (don't actually apply/remove");
+			Console.WriteLine("\t {0}{1}", "".PadRight(tab), "any migrations)");
+			Console.WriteLine("\t-{0}{1}", "schema NAME".PadRight(tab), "The schema name to apply migration to. This just");
+			Console.WriteLine("\t {0}{1}", "".PadRight(tab), "controls the migration tracking, your migrations need");
+			Console.WriteLine("\t {0}{1}", "".PadRight(tab), "to ensure they are going to the correct schema.");
+			Console.WriteLine("\t-{0}{1}", "obsolete".PadRight(tab), "Will display applied obsolete migrations");
 			Console.WriteLine();
 		}
 		
@@ -159,11 +186,10 @@ namespace Migrator.MigratorConsole
 		private Migrator GetMigrator()
 		{
 			Assembly asm = Assembly.LoadFrom(_migrationsAssembly);
-			
-			Migrator migrator = new Migrator(_provider, _connectionString, asm, _trace, _schemaName);
-			migrator.args = args;
-		    migrator.DryRun = _dryrun;
-			return migrator;
+
+		    var migrator = new Migrator(_provider, _connectionString, asm, _trace, _schemaName)
+		                       {args = args, DryRun = _dryrun, Obsolete = _obsolete};
+		    return migrator;
 		}
 				
 		private void ParseArguments(string[] argv)
@@ -195,6 +221,11 @@ namespace Migrator.MigratorConsole
                 else if (argv[i].Equals("-schema"))
                 {
                     _schemaName = argv[i + 1];
+                    i++;
+                }
+                else if (argv[i].Equals("-obsolete"))
+                {
+                    _obsolete = true;
                     i++;
                 }
 				else
