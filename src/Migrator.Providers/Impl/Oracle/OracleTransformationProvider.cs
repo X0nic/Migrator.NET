@@ -191,5 +191,11 @@ namespace Migrator.Providers.Oracle
                 return string.Format("{0}.{1}", _schemaName, "SchemaInfo");
             }
         }
+        public override int ExecuteNonQuery(string sql)
+        {
+            sql = sql.Replace("\r\n", "\n");
+
+            return base.ExecuteNonQuery(sql);
+        }
     }
 }

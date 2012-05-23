@@ -549,7 +549,7 @@ namespace Migrator.Providers
 			return ConstraintExists(table, name);
 		}
 
-		public int ExecuteNonQuery(string sql)
+		public virtual int ExecuteNonQuery(string sql)
 		{
             Logger.Trace(sql);
             Logger.ApplyingDBChange(sql);
